@@ -79,9 +79,10 @@ def create_message(
 
     # 1. Store the user's message
     user_msg = crud.create_message(db, message)
+    prompt = f"User: {message.content}\nAssistant:"
 
     # 2. Call the LLM to generate a response
-    assistant_content = llm.generate(prompt=message.content)
+    assistant_content = llm.generate(prompt=prompt)
 
     # 3. Store the assistant's response
     assistant_msg = crud.create_message(
