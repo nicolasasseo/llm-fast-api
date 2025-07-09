@@ -27,39 +27,82 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Ollama Chat API", version="0.1.0", lifespan=lifespan)
 
 
-@app.post("/generate", response_model=schemas.GenerateResponse)
-def generate_text(
-    request: schemas.GenerateRequest,
-    db: Session = Depends(database.get_db),
-):
-    """Generate a completion from the language model and store it in DB."""
-    try:
-        response_text = llm.generate(
-            prompt=request.prompt,
-            max_tokens=request.max_tokens,
-            temperature=request.temperature,
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# --- User Endpoints ---
+@app.post("/users", response_model=schemas.UserRead)
+def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    db_user = crud.get_user_by_username(db, user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    return crud.create_user(db, user)
 
-    conversation = crud.create_conversation(
-        db, prompt=request.prompt, response=response_text
+
+@app.get("/users/{user_id}", response_model=schemas.UserRead)
+def get_user(user_id: int, db: Session = Depends(database.get_db)):
+    user = crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+# --- Chat Session Endpoints ---
+@app.post("/sessions", response_model=schemas.ChatSessionRead)
+def create_chat_session(
+    session: schemas.ChatSessionCreate, db: Session = Depends(database.get_db)
+):
+    user = crud.get_user_by_id(db, session.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return crud.create_chat_session(db, session)
+
+
+@app.get("/users/{user_id}/sessions", response_model=list[schemas.ChatSessionRead])
+def list_chat_sessions(user_id: int, db: Session = Depends(database.get_db)):
+    user = crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    sessions = crud.get_chat_sessions_by_user(db, user_id)
+    return sessions
+
+
+# --- Message Endpoints ---
+@app.post("/messages", response_model=schemas.MessageRead)
+def create_message(
+    message: schemas.MessageCreate, db: Session = Depends(database.get_db)
+):
+    session = (
+        db.query(models.ChatSession)
+        .filter(models.ChatSession.id == message.chat_session_id)
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+
+    # 1. Store the user's message
+    user_msg = crud.create_message(db, message)
+
+    # 2. Call the LLM to generate a response
+    assistant_content = llm.generate(prompt=message.content)
+
+    # 3. Store the assistant's response
+    assistant_msg = crud.create_message(
+        db,
+        schemas.MessageCreate(
+            chat_session_id=message.chat_session_id,
+            sender="assistant",
+            content=assistant_content,
+        ),
     )
 
-    return schemas.GenerateResponse.model_validate(conversation)
+    # 4. Return the assistant's message (or both messages if you want)
+    return assistant_msg
 
 
-@app.get("/conversations/{conversation_id}", response_model=schemas.GenerateResponse)
-def read_conversation(conversation_id: int, db: Session = Depends(database.get_db)):
-    conversation = crud.get_conversation(db, conversation_id)
-    if not conversation:
-        raise HTTPException(status_code=404, detail="Conversation not found")
-    return schemas.GenerateResponse.model_validate(conversation)
-
-
-@app.get("/conversations", response_model=list[schemas.GenerateResponse])
-def list_conversations(
-    skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)
-):
-    conversations = crud.list_conversations(db, skip=skip, limit=limit)
-    return [schemas.GenerateResponse.model_validate(c) for c in conversations]
+@app.get("/sessions/{session_id}/messages", response_model=list[schemas.MessageRead])
+def list_messages(session_id: int, db: Session = Depends(database.get_db)):
+    session = (
+        db.query(models.ChatSession).filter(models.ChatSession.id == session_id).first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    messages = crud.get_messages_by_session(db, session_id)
+    return messages
