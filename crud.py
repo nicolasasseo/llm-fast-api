@@ -1,3 +1,9 @@
+"""CRUD (Create-Read-Update-Delete) helpers for Conversation records.
+
+These functions wrap SQLAlchemy operations so that database access is kept
+separate from the FastAPI route handlers.
+"""
+
 from sqlalchemy.orm import Session
 
 import models

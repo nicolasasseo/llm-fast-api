@@ -1,3 +1,9 @@
+"""FastAPI application exposing chat generation and conversation history APIs.
+
+The app wires together database models, CRUD helpers, Pydantic schemas, and an
+Ollama LLM client to offer a minimal chat completion service.
+"""
+
 from fastapi import FastAPI, Depends, HTTPException
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session

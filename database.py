@@ -1,3 +1,9 @@
+"""Database configuration and session helpers.
+
+Initialises the SQLAlchemy engine from the DATABASE_URL environment variable
+and exposes a `get_db` generator dependency for FastAPI routes.
+"""
+
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base

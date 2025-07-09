@@ -1,3 +1,5 @@
+"""Pydantic request/response schemas used by the API endpoints."""
+
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
 
