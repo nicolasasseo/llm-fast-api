@@ -27,40 +27,17 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Ollama Chat API", version="0.1.0", lifespan=lifespan)
 
 
-# --- User Endpoints ---
-@app.post("/users", response_model=schemas.UserRead)
-def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
-    db_user = crud.get_user_by_username(db, user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    return crud.create_user(db, user)
-
-
-@app.get("/users/{user_id}", response_model=schemas.UserRead)
-def get_user(user_id: int, db: Session = Depends(database.get_db)):
-    user = crud.get_user_by_id(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-
 # --- Chat Session Endpoints ---
 @app.post("/sessions", response_model=schemas.ChatSessionRead)
 def create_chat_session(
     session: schemas.ChatSessionCreate, db: Session = Depends(database.get_db)
 ):
-    user = crud.get_user_by_id(db, session.user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     return crud.create_chat_session(db, session)
 
 
-@app.get("/users/{user_id}/sessions", response_model=list[schemas.ChatSessionRead])
-def list_chat_sessions(user_id: int, db: Session = Depends(database.get_db)):
-    user = crud.get_user_by_id(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    sessions = crud.get_chat_sessions_by_user(db, user_id)
+@app.get("/sessions", response_model=list[schemas.ChatSessionRead])
+def list_chat_sessions(db: Session = Depends(database.get_db)):
+    sessions = crud.get_chat_sessions(db)
     return sessions
 
 

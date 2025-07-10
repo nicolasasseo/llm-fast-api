@@ -20,34 +20,19 @@ class GenerateResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserCreate(BaseModel):
-    username: str = Field(..., description="Unique username")
-    email: str = Field(..., description="User email")
-    password: str = Field(..., description="User password")
-
-
-class UserRead(BaseModel):
-    id: int
-    username: str
-    email: str
-    model_config = ConfigDict(from_attributes=True)
-
-
 class ChatSessionCreate(BaseModel):
-    # Optionally allow naming sessions, or just use user_id
-    user_id: int = Field(..., description="ID of the user starting the session")
+    pass
 
 
 class ChatSessionRead(BaseModel):
     id: int
-    user_id: int
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
 
 class MessageCreate(BaseModel):
     chat_session_id: int = Field(..., description="ID of the chat session")
-    sender: str = Field(..., description='"user" or "assistant"')
+    sender: str = Field(..., description='"user" or "assistant" or "agent-prompt"')
     content: str = Field(..., description="Message content")
 
 

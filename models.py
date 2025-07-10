@@ -7,27 +7,13 @@ from database import Base
 import datetime
 
 
-class User(Base):
-    """Represents an account (with username, email, password hash, etc.)"""
-
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    chat_sessions = relationship("ChatSession", back_populates="user")
-
-
 class ChatSession(Base):
     """Represents a chat session belonging to a user."""
 
     __tablename__ = "chat_sessions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    user = relationship("User", back_populates="chat_sessions")
     messages = relationship("Message", back_populates="chat_session")
 
 
@@ -38,7 +24,7 @@ class Message(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     chat_session_id = Column(Integer, ForeignKey("chat_sessions.id"))
-    sender = Column(String)  # "user" or "assistant"
+    sender = Column(String)  # "user" or "assistant" or "agent-prompt"
     content = Column(Text)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
     chat_session = relationship("ChatSession", back_populates="messages")
