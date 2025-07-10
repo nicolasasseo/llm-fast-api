@@ -1,45 +1,20 @@
-"""Pydantic request/response schemas used by the API endpoints."""
+"""Pydantic request/response schemas for the simple chat API."""
 
 from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 
 
-class GenerateRequest(BaseModel):
-    prompt: str = Field(..., description="User prompt to send to LLM")
-    max_tokens: int = Field(128, description="Maximum number of tokens to generate")
-    temperature: float = Field(0.7, description="Sampling temperature")
+class ChatRequest(BaseModel):
+    message: str = Field(..., description="User message to send to LLM")
+    system_prompt: str = Field(
+        ..., description="System prompt to define the agent's behavior"
+    )
 
 
-class GenerateResponse(BaseModel):
-    id: int
-    prompt: str
-    response: str
-    created_at: datetime
-
-    # Enable attribute-based validation for ORM objects
-    model_config = ConfigDict(from_attributes=True)
+class ChatResponse(BaseModel):
+    response: str = Field(..., description="LLM's response to the user message")
+    history: list[str] = Field(..., description="Full conversation history")
 
 
-class ChatSessionCreate(BaseModel):
-    pass
-
-
-class ChatSessionRead(BaseModel):
-    id: int
-    created_at: datetime
-    model_config = ConfigDict(from_attributes=True)
-
-
-class MessageCreate(BaseModel):
-    chat_session_id: int = Field(..., description="ID of the chat session")
-    sender: str = Field(..., description='"user" or "assistant" or "agent-prompt"')
-    content: str = Field(..., description="Message content")
-
-
-class MessageRead(BaseModel):
-    id: int
-    chat_session_id: int
-    sender: str
-    content: str
-    timestamp: datetime
-    model_config = ConfigDict(from_attributes=True)
+class HistoryResponse(BaseModel):
+    history: list[str] = Field(..., description="Full conversation history")
