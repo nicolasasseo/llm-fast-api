@@ -5,11 +5,12 @@ Ollama daemon on the host (typically listening at http://localhost:11434).
 """
 
 from __future__ import annotations
-
+from dotenv import load_dotenv
 import os
 from functools import lru_cache
 from typing import Any, Dict, cast
 
+load_dotenv()
 import ollama
 
 

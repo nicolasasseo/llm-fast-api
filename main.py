@@ -34,17 +34,3 @@ def chat(request: schemas.ChatRequest):
     return schemas.ChatResponse(
         response=assistant_response, history=conversation_history
     )
-
-
-@app.get("/history", response_model=schemas.HistoryResponse)
-def get_history():
-    """Get the full conversation history."""
-    return schemas.HistoryResponse(history=conversation_history)
-
-
-@app.delete("/history")
-def clear_history():
-    """Clear the conversation history."""
-    global conversation_history
-    conversation_history = []
-    return {"message": "Conversation history cleared"}
