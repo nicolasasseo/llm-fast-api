@@ -21,8 +21,8 @@ def _get_model_name() -> str:
 
 
 def generate(
-    prompt: str,
-    max_tokens: int = 128,
+    messages: list,
+    max_tokens: int = -1,
     temperature: float = 0.7,
 ) -> str:
     """Generate text using the Ollama chat API.
@@ -46,7 +46,7 @@ def generate(
         Dict[str, Any],
         ollama.chat(
             model=_get_model_name(),
-            messages=[{"role": "user", "content": prompt}],
+            messages=messages,
             options=cast(Any, options),  # silences previous arg-type warning
             stream=False,  # returns a dict, not an iterator
         ),

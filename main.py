@@ -17,19 +17,29 @@ def chat(request: schemas.ChatRequest):
 
     # Initialize conversation with system prompt if empty
     if not conversation_history:
-        conversation_history.append(f"System: {request.system_prompt}")
+        conversation_history.append(
+            {"role": "system", "content": request.system_prompt}
+        )
+
+    # Update system prompt if it has changed
+
+    if (
+        conversation_history
+        and request.system_prompt != conversation_history[0]["content"]
+    ):
+        print("System prompt has changed")
+        conversation_history[0]["content"] = request.system_prompt
+    else:
+        print("System prompt has not changed")
 
     # Add user message to history
-    conversation_history.append(f"User: {request.message}")
-
-    # Build prompt for LLM (all history + prompt for assistant response)
-    prompt = "\n".join(conversation_history) + "\nAssistant:"
+    conversation_history.append({"role": "user", "content": request.message})
 
     # Get LLM response
-    assistant_response = llm.generate(prompt=prompt)
+    assistant_response = llm.generate(messages=conversation_history)
 
     # Add assistant response to history
-    conversation_history.append(f"Assistant: {assistant_response}")
+    conversation_history.append({"role": "assistant", "content": assistant_response})
 
     return schemas.ChatResponse(
         response=assistant_response, history=conversation_history

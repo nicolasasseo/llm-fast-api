@@ -13,8 +13,8 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str = Field(..., description="LLM's response to the user message")
-    history: list[str] = Field(..., description="Full conversation history")
+    history: list[dict] = Field(..., description="Full conversation history")
 
 
 class HistoryResponse(BaseModel):
-    history: list[str] = Field(..., description="Full conversation history")
+    history: list[dict] = Field(..., description="Full conversation history")
