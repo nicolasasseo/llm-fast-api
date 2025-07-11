@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 import schemas
 import llm
+from fastapi.responses import StreamingResponse
 
 app = FastAPI(title="Simple Chat API", version="0.1.0")
 
@@ -44,3 +45,34 @@ def chat(request: schemas.ChatRequest):
     return schemas.ChatResponse(
         response=assistant_response, history=conversation_history
     )
+
+
+@app.post("/chat/stream")
+def chat_stream(request: schemas.ChatRequest):
+    global conversation_history
+
+    # Initialize conversation with system prompt if empty
+    if not conversation_history:
+        conversation_history.append(
+            {"role": "system", "content": request.system_prompt}
+        )
+
+    # Update system prompt if it has changed
+    if (
+        conversation_history
+        and request.system_prompt != conversation_history[0]["content"]
+    ):
+        conversation_history[0]["content"] = request.system_prompt
+
+    # Add user message to history
+    conversation_history.append({"role": "user", "content": request.message})
+
+    # Define a generator that yields the response as it streams
+    def response_generator():
+        for chunk in llm.generate_stream(messages=conversation_history):
+            yield chunk
+
+    # Optionally, you can add the full assistant response to history after streaming is done
+    # (depends on your llm.generate_stream implementation)
+
+    return StreamingResponse(response_generator(), media_type="text/plain")

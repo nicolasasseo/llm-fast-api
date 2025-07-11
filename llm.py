@@ -56,3 +56,29 @@ def generate(
 
     # Ollama returns a dict with key 'message' containing 'content'
     return response["message"]["content"].strip()
+
+
+def generate_stream(
+    messages: list,
+    max_tokens: int = -1,
+    temperature: float = 0.7,
+):
+    """Stream text using the Ollama chat API."""
+    options: Dict[str, Any] = {
+        "temperature": temperature,
+        "num_predict": max_tokens,
+    }
+
+    # This will yield each chunk as it is produced by the model
+    for chunk in ollama.chat(
+        model=_get_model_name(),
+        messages=messages,
+        options=cast(Any, options),
+        stream=True,  # Enable streaming
+    ):
+        if isinstance(chunk, dict):
+            content = chunk.get("message", {}).get("content", "")
+            if content:
+                yield content
+        elif isinstance(chunk, str):
+            yield chunk
