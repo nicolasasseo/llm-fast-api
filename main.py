@@ -69,10 +69,11 @@ def chat_stream(request: schemas.ChatRequest):
 
     # Define a generator that yields the response as it streams
     def response_generator():
+        response_chunks = []
         for chunk in llm.generate_stream(messages=conversation_history):
+            response_chunks.append(chunk)
             yield chunk
-
-    # Optionally, you can add the full assistant response to history after streaming is done
-    # (depends on your llm.generate_stream implementation)
+        full_response = "".join(response_chunks)
+        conversation_history.append({"role": "assistant", "content": full_response})
 
     return StreamingResponse(response_generator(), media_type="text/plain")
