@@ -42,6 +42,8 @@ def generate(
         "num_predict": max_tokens,
     }
 
+    print(_get_model_name())
+
     response = cast(
         Dict[str, Any],
         ollama.chat(
