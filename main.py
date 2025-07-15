@@ -3,8 +3,10 @@
 from fastapi import FastAPI
 import schemas
 import llm
+import logging
 
-print("Context length: ", llm.get_context_length())
+logging.basicConfig(level=logging.INFO)
+logging.info("Context length: %s", llm.get_context_length())
 from fastapi.responses import StreamingResponse
 
 app = FastAPI(title="Simple Chat API", version="0.1.0")
