@@ -33,10 +33,13 @@ def chat(request: schemas.ChatRequest):
         conversation_history
         and request.system_prompt != conversation_history[0]["content"]
     ):
-        print("System prompt has changed")
-        conversation_history[0]["content"] = request.system_prompt
+        logging.info("System prompt has changed")
+        conversation_history.pop(0)
+        conversation_history.insert(
+            0, {"role": "system", "content": request.system_prompt}
+        )
     else:
-        print("System prompt has not changed")
+        logging.info("System prompt has not changed")
 
     # Add user message to history
     conversation_history.append({"role": "user", "content": request.message})
