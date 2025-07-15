@@ -16,8 +16,13 @@ import ollama
 
 @lru_cache(maxsize=1)
 def _get_model_name() -> str:
-    """Return the model name configured via environment variable or default."""
-    return os.getenv("OLLAMA_MODEL_NAME", "tinyllama:latest")
+    env_value = os.getenv("OLLAMA_MODEL_NAME")
+    if env_value is not None:
+        print(f"Using OLLAMA_MODEL_NAME from environment: {env_value}")
+        return env_value
+    else:
+        print("OLLAMA_MODEL_NAME not set, using default: tinyllama:latest")
+        return "tinyllama:latest"
 
 
 def generate(
@@ -41,8 +46,6 @@ def generate(
         "temperature": temperature,
         "num_predict": max_tokens,
     }
-
-    print(_get_model_name())
 
     response = cast(
         Dict[str, Any],
@@ -68,8 +71,6 @@ def generate_stream(
         "temperature": temperature,
         "num_predict": max_tokens,
     }
-
-    print(_get_model_name())
 
     # This will yield each chunk as it is produced by the model
     for chunk in ollama.chat(
