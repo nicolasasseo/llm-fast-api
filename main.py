@@ -106,7 +106,13 @@ def chat_stream(
         conversation_history
         and request.system_prompt != conversation_history[0]["content"]
     ):
-        conversation_history[0]["content"] = request.system_prompt
+        logging.info("System prompt has changed")
+        conversation_history.pop(0)
+        conversation_history.insert(
+            0, {"role": "system", "content": request.system_prompt}
+        )
+    else:
+        logging.info("System prompt has not changed")
 
     # Add user message to history
     conversation_history.append({"role": "user", "content": request.message})
