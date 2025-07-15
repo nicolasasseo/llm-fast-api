@@ -30,9 +30,6 @@ def get_context_length(modelname: str = _get_model_name()):
     return ollama.show(modelname).get("model_info", {}).get("llama.context_length", 0)
 
 
-print("Get context length: ", get_context_length())
-
-
 def generate(
     messages: list,
     max_tokens: int = -1,
