@@ -4,6 +4,36 @@ from fastapi import FastAPI
 import schemas
 import llm
 import logging
+import os
+from fastapi import Depends, HTTPException, status, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    raise RuntimeError("API_KEY not set in environment variables")
+
+
+# Dependency for API key authentication
+class APIKeyAuth(HTTPBearer):
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials:
+        credentials = await super().__call__(request)
+        if (
+            credentials is None
+            or credentials.scheme.lower() != "bearer"
+            or credentials.credentials != API_KEY
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or missing API Key",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return credentials
+
+
+api_key_auth = APIKeyAuth()
 
 logging.basicConfig(level=logging.INFO)
 logging.info("Context length: %s", llm.get_context_length())
@@ -17,7 +47,10 @@ conversation_history = []
 
 
 @app.post("/chat", response_model=schemas.ChatResponse)
-def chat(request: schemas.ChatRequest):
+def chat(
+    request: schemas.ChatRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(api_key_auth),
+):
     """Send a message and get LLM response with conversation history."""
     global conversation_history
 
@@ -56,7 +89,10 @@ def chat(request: schemas.ChatRequest):
 
 
 @app.post("/chat/stream")
-def chat_stream(request: schemas.ChatRequest):
+def chat_stream(
+    request: schemas.ChatRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(api_key_auth),
+):
     global conversation_history
 
     # Initialize conversation with system prompt if empty
