@@ -17,7 +17,7 @@ import ollama
 @lru_cache(maxsize=1)
 def _get_model_name() -> str:
     """Return the model name configured via environment variable or default."""
-    return os.getenv("OLLAMA_MODEL_NAME", "llama2")
+    return os.getenv("OLLAMA_MODEL_NAME", "mistral:latest")
 
 
 def generate(
@@ -68,6 +68,8 @@ def generate_stream(
         "temperature": temperature,
         "num_predict": max_tokens,
     }
+
+    print(_get_model_name())
 
     # This will yield each chunk as it is produced by the model
     for chunk in ollama.chat(
