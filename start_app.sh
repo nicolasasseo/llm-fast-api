@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Kill all running Ollama processes
+# Kill all running Ollama processes & FastAPI
 pkill -f ollama
+pkill -f uvicorn
 
 # Start Ollama in the background, log output
 ollama serve > ollama.log 2>&1 &
