@@ -25,6 +25,14 @@ def _get_model_name() -> str:
         return "tinyllama:latest"
 
 
+def get_context_length(modelname: str = _get_model_name()):
+    """Get the context length for a given model."""
+    return ollama.show(modelname)
+
+
+print("Get context length: ", get_context_length())
+
+
 def generate(
     messages: list,
     max_tokens: int = -1,
