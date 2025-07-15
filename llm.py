@@ -27,7 +27,7 @@ def _get_model_name() -> str:
 
 def get_context_length(modelname: str = _get_model_name()):
     """Get the context length for a given model."""
-    return ollama.show(modelname)
+    return ollama.show(modelname).get("model_info", {}).get("context_length", 0)
 
 
 print("Get context length: ", get_context_length())
