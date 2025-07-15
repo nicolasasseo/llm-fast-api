@@ -17,7 +17,7 @@ import ollama
 @lru_cache(maxsize=1)
 def _get_model_name() -> str:
     """Return the model name configured via environment variable or default."""
-    return os.getenv("OLLAMA_MODEL_NAME", "mistral:latest")
+    return os.getenv("OLLAMA_MODEL_NAME", "tinyllama:latest")
 
 
 def generate(
