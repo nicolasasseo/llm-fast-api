@@ -3,11 +3,12 @@
 from fastapi import FastAPI
 import schemas
 import llm
+
+print("Context length: ", llm.get_context_length())
 from fastapi.responses import StreamingResponse
 
 app = FastAPI(title="Simple Chat API", version="0.1.0")
 
-print("Context length: ", llm.get_context_length())
 
 # In-memory conversation history
 conversation_history = []
