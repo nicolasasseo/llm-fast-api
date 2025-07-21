@@ -76,6 +76,7 @@ def chat(
 
     # Add user message to history
     conversation_history.append({"role": "user", "content": request.message})
+    logging.info(f"Chat sent: {request.message}")
 
     # Get LLM response
     assistant_response = llm.generate(messages=conversation_history)
