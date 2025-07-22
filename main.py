@@ -59,6 +59,11 @@ def chat(
     message = {"role": "user", "content": request.message}
     request.history.append(message)
 
+    print(
+        "HISTORY $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
+        request.history,
+    )
+
     logging.info(f"Chat sent: {request.message}")
     logging.info(f"Conversation history: {request.history}")
     logging.info(f"System prompt: {request.system_prompt}")
