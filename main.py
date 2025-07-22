@@ -67,6 +67,7 @@ def chat(
         conversation_history.append({"role": role, "content": msg["content"]})
 
     logging.info(f"Chat sent: {request.message}")
+    logging.info(f"Conversation history: {conversation_history}")
     logging.info(f"System prompt: {request.system_prompt}")
 
     # Get LLM response
