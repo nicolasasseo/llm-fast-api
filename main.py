@@ -56,6 +56,8 @@ def chat(
     credentials: HTTPAuthorizationCredentials = Depends(api_key_auth),
 ):
     """Send a message and get LLM response with conversation history."""
+    message = {"role": "user", "content": request.message}
+    request.history.append(message)
 
     logging.info(f"Chat sent: {request.message}")
     logging.info(f"Conversation history: {request.history}")
