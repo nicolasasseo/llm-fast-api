@@ -82,23 +82,16 @@ def chat_stream(
     request: schemas.ChatRequest,
     credentials: HTTPAuthorizationCredentials = Depends(api_key_auth),
 ):
-    conversation_history = []
-    for msg in request.history:
-        if msg["from"] == "human":
-            role = "user"
-        elif msg["from"] == "ai":
-            role = "assistant"
-        else:
-            continue
-        conversation_history.append({"role": role, "content": msg["content"]})
+    message = {"role": "user", "content": request.message}
+    request.history.append(message)
 
     # Define a generator that yields the response as it streams
     def response_generator():
         response_chunks = []
-        for chunk in llm.generate_stream(messages=conversation_history):
+        for chunk in llm.generate_stream(messages=request.history):
             response_chunks.append(chunk)
             yield chunk
         full_response = "".join(response_chunks)
-        conversation_history.append({"role": "assistant", "content": full_response})
+        request.history.append({"role": "assistant", "content": full_response})
 
     return StreamingResponse(response_generator(), media_type="text/plain")
