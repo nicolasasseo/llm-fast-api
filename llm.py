@@ -62,9 +62,6 @@ def generate(
         ),
     )
 
-    print("Message received:", messages[-1])
-    print("Response:", response["message"]["content"])
-
     # Ollama returns a dict with key 'message' containing 'content'
     return response["message"]["content"].strip()
 
