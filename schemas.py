@@ -9,6 +9,7 @@ class ChatRequest(BaseModel):
     system_prompt: str = Field(
         ..., description="System prompt to define the agent's behavior"
     )
+    history: list[dict] = Field(default_factory=list)
 
 
 class ChatResponse(BaseModel):

@@ -48,7 +48,6 @@ app = FastAPI(title="Simple Chat API", version="0.1.0")
 
 
 # In-memory conversation history
-conversation_history = []
 
 
 @app.post("/chat", response_model=schemas.ChatResponse)
@@ -57,30 +56,16 @@ def chat(
     credentials: HTTPAuthorizationCredentials = Depends(api_key_auth),
 ):
     """Send a message and get LLM response with conversation history."""
-    global conversation_history
+    conversation_history = []
+    for msg in request.history:
+        if msg["from"] == "human":
+            role = "user"
+        elif msg["from"] == "ai":
+            role = "assistant"
+        else:
+            continue
+        conversation_history.append({"role": role, "content": msg["content"]})
 
-    # Initialize conversation with system prompt if empty
-    if not conversation_history:
-        conversation_history.append(
-            {"role": "system", "content": request.system_prompt}
-        )
-
-    # Update system prompt if it has changed
-
-    if (
-        conversation_history
-        and request.system_prompt != conversation_history[0]["content"]
-    ):
-        logging.info("System prompt has changed")
-        conversation_history.pop(0)
-        conversation_history.insert(
-            0, {"role": "system", "content": request.system_prompt}
-        )
-    else:
-        logging.info("System prompt has not changed")
-
-    # Add user message to history
-    conversation_history.append({"role": "user", "content": request.message})
     logging.info(f"Chat sent: {request.message}")
     logging.info(f"System prompt: {request.system_prompt}")
 
@@ -100,29 +85,15 @@ def chat_stream(
     request: schemas.ChatRequest,
     credentials: HTTPAuthorizationCredentials = Depends(api_key_auth),
 ):
-    global conversation_history
-
-    # Initialize conversation with system prompt if empty
-    if not conversation_history:
-        conversation_history.append(
-            {"role": "system", "content": request.system_prompt}
-        )
-
-    # Update system prompt if it has changed
-    if (
-        conversation_history
-        and request.system_prompt != conversation_history[0]["content"]
-    ):
-        logging.info("System prompt has changed")
-        conversation_history.pop(0)
-        conversation_history.insert(
-            0, {"role": "system", "content": request.system_prompt}
-        )
-    else:
-        logging.info("System prompt has not changed")
-
-    # Add user message to history
-    conversation_history.append({"role": "user", "content": request.message})
+    conversation_history = []
+    for msg in request.history:
+        if msg["from"] == "human":
+            role = "user"
+        elif msg["from"] == "ai":
+            role = "assistant"
+        else:
+            continue
+        conversation_history.append({"role": role, "content": msg["content"]})
 
     # Define a generator that yields the response as it streams
     def response_generator():
