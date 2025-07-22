@@ -56,29 +56,18 @@ def chat(
     credentials: HTTPAuthorizationCredentials = Depends(api_key_auth),
 ):
     """Send a message and get LLM response with conversation history."""
-    conversation_history = []
-    for msg in request.history:
-        if msg["from"] == "human":
-            role = "user"
-        elif msg["from"] == "ai":
-            role = "assistant"
-        else:
-            continue
-        conversation_history.append({"role": role, "content": msg["content"]})
 
     logging.info(f"Chat sent: {request.message}")
-    logging.info(f"Conversation history: {conversation_history}")
+    logging.info(f"Conversation history: {request.history}")
     logging.info(f"System prompt: {request.system_prompt}")
 
     # Get LLM response
-    assistant_response = llm.generate(messages=conversation_history)
+    assistant_response = llm.generate(messages=request.history)
 
     # Add assistant response to history
-    conversation_history.append({"role": "assistant", "content": assistant_response})
+    request.history.append({"role": "assistant", "content": assistant_response})
 
-    return schemas.ChatResponse(
-        response=assistant_response, history=conversation_history
-    )
+    return schemas.ChatResponse(response=assistant_response, history=request.history)
 
 
 @app.post("/chat/stream")
