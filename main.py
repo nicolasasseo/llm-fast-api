@@ -35,7 +35,12 @@ class APIKeyAuth(HTTPBearer):
 
 api_key_auth = APIKeyAuth()
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    filename="fastapi.log",  # Log to this file
+    filemode="a",  # Append to the file
+    format="%(asctime)s %(levelname)s %(message)s",
+)
 logging.info("Context length: %s", llm.get_context_length())
 from fastapi.responses import StreamingResponse
 
