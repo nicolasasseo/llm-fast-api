@@ -91,6 +91,12 @@ def chat_stream(
     messages = [msg for msg in messages if msg.get("content")]
     print(f"Messages: {messages}")
 
+    ct = 0
+    for msg in messages:
+        if msg.get("role") != "system":
+            ct += 1
+    print(f"NUMBER OF MESSAGES ------------------------- : {ct}")
+
     # Define a generator that yields the response as it streams
     def response_generator():
         response_chunks = []
