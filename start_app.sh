@@ -12,4 +12,4 @@ sleep 3
 
 # Activate virtual environment and start FastAPI in the background, log output
 source venv/bin/activate
-uvicorn main:app --host 0.0.0.0 --port 8000 &
+uvicorn main:app --host 0.0.0.0 --port 8000 > fastapi.log 2>&1 &

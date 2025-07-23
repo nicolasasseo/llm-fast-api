@@ -89,6 +89,7 @@ def chat_stream(
 
     # Optionally filter out empty content messages as discussed before
     messages = [msg for msg in messages if msg.get("content")]
+    print(f"Messages: {messages}")
 
     # Define a generator that yields the response as it streams
     def response_generator():
