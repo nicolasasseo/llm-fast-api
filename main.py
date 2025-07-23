@@ -68,8 +68,14 @@ def chat(
     logging.info(f"Conversation history: {request.history}")
     logging.info(f"System prompt: {request.system_prompt}")
 
+    system_message = {"role": "system", "content": request.system_prompt}
+    messages = [system_message] + request.history
+
+    # Optionally filter out empty content messages as discussed before
+    messages = [msg for msg in messages if msg.get("content")]
+
     # Get LLM response
-    assistant_response = llm.generate(messages=request.history)
+    assistant_response = llm.generate(messages=messages)
 
     # Add assistant response to history
     request.history.append({"role": "assistant", "content": assistant_response})
