@@ -84,10 +84,16 @@ def chat_stream(
     message = {"role": "user", "content": request.message}
     request.history.append(message)
 
+    system_message = {"role": "system", "content": request.system_prompt}
+    messages = [system_message] + request.history
+
+    # Optionally filter out empty content messages as discussed before
+    messages = [msg for msg in messages if msg.get("content")]
+
     # Define a generator that yields the response as it streams
     def response_generator():
         response_chunks = []
-        for chunk in llm.generate_stream(messages=request.history):
+        for chunk in llm.generate_stream(messages=messages):
             response_chunks.append(chunk)
             yield chunk
         full_response = "".join(response_chunks)
