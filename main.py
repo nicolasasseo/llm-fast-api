@@ -65,7 +65,7 @@ def chat(
     # Optionally filter out empty content messages as discussed before
     messages = [msg for msg in messages if msg.get("content")]
 
-    logging.info(f"Messages: {messages}")
+    print(f"Messages: {messages}")
 
     # Get LLM response
     assistant_response = llm.generate(messages=messages)
